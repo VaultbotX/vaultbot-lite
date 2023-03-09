@@ -4,13 +4,21 @@
   "description": "Barebones implementation of the core functionality of Vaultbot",
   "main": "src/index.ts",
   "scripts": {
+    "start": "set NODE_ENV=production&&ts-node src/index.ts",
     "dev": "nodemon --watch \"src/**\" --ext \"ts,json\" --ignore \"src/**/*.spec.ts\" --exec \"ts-node src/index.ts\"",
+    "lint": "npx prettier --config .prettierrc.json --write .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "dotenv": "^16.0.3",
     "nodemon": "^2.0.21",
+    "prettier": "^2.8.4",
     "ts-node": "^10.9.1"
+  },
+  "dependencies": {
+    "discord.js": "^14.7.1",
+    "winston": "^3.8.2"
   }
 }
