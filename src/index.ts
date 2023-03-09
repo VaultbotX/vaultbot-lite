@@ -30,9 +30,13 @@ if (!DISCORD_CLIENT_ID) {
   process.exit(1)
 }
 
+enum CommandNames {
+	ping = "ping",
+}
+
 const commands = [
   {
-    name: "ping",
+    name: CommandNames.ping,
     description: "Replies with Pong!",
   },
 ]
@@ -66,7 +70,7 @@ client.on("ready", () => {
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return
 
-  if (interaction.commandName === "ping") {
+  if (interaction.commandName === CommandNames.ping) {
     await interaction.reply("Pong!")
   }
 })
