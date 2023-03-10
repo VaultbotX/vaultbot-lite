@@ -1,32 +1,31 @@
 import neo4j from "neo4j-driver"
+import type { Driver } from "neo4j-driver"
 import { logger } from "../logger"
 
-const NEO4J_HOST = process.env.NEO4J_HOST
-const NEO4J_USERNAME = process.env.NEO4J_USERNAME
-const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD
+export let neo4jDriver: Driver
 
-if (!NEO4J_HOST) {
-  logger.error("NEO4J_HOST is not set")
-  process.exit(1)
+function initNeo4jDriver() {
+  const NEO4J_HOST = process.env.NEO4J_HOST;
+  const NEO4J_AUTH = process.env.NEO4J_AUTH;
+
+  if (!NEO4J_AUTH || !NEO4J_HOST) {
+    logger.error("Neo4j credentials are not set, this should have been handled during startup")
+    process.exit(1)
+  }
+
+  const username = NEO4J_AUTH.split("/")[0]
+  const password = NEO4J_AUTH.split("/")[1]
+
+  neo4jDriver = neo4j.driver(
+    `bolt://${NEO4J_HOST}:7687`,
+    neo4j.auth.basic(username, password)
+  )
 }
 
-if (!NEO4J_USERNAME) {
-  logger.error("NEO4J_USERNAME is not set")
-  process.exit(1)
-}
+export async function initNeo4jConnection() {
+  initNeo4jDriver()
 
-if (!NEO4J_PASSWORD) {
-  logger.error("NEO4J_PASSWORD is not set")
-  process.exit(1)
-}
-
-export const driver = neo4j.driver(
-  `bolt://${NEO4J_HOST}:7687`,
-  neo4j.auth.basic(NEO4J_USERNAME, NEO4J_PASSWORD)
-)
-
-export async function initDatabaseConnection() {
-  const session = driver.session()
+  const session = neo4jDriver.session()
 
   try {
     await session.run("MATCH (n) RETURN n LIMIT 1")

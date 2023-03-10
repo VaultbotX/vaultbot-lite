@@ -1,7 +1,7 @@
 import { REST, Client, GatewayIntentBits } from "discord.js"
 import { logger } from "./logger"
 import { onInteraction, onReady, refreshSlashCommands } from "./discord"
-import { initDatabaseConnection } from "./database"
+import { initNeo4jConnection } from "./database"
 
 if (process.env.NODE_ENV !== "production") {
   logger.level = "debug"
@@ -17,20 +17,31 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN
-const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID
-
 if (!DISCORD_TOKEN) {
   logger.error("DISCORD_TOKEN is not set")
   process.exit(1)
 }
 
+const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID
 if (!DISCORD_CLIENT_ID) {
   logger.error("DISCORD_CLIENT_ID is not set")
   process.exit(1)
 }
 
+const NEO4J_HOST = process.env.NEO4J_HOST
+if (!NEO4J_HOST) {
+  logger.error("NEO4J_HOST is not set")
+  process.exit(1)
+}
+
+const NEO4J_AUTH = process.env.NEO4J_AUTH
+if (!NEO4J_AUTH) {
+  logger.error("NEO4J_AUTH is not set")
+  process.exit(1)
+}
+
 ;(async () => {
-  await initDatabaseConnection()
+  await initNeo4jConnection()
 })()
 
 const rest: REST = new REST({ version: "10" }).setToken(DISCORD_TOKEN)
