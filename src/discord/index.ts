@@ -8,19 +8,30 @@ export enum CommandNames {
 export const commands = [
   {
     name: CommandNames.ping,
-    description: "Replies with Pong!",
-  },
-]
+    description: "Replies with Pong!"
+  }
+];
 
 export async function refreshSlashCommands(clientId: string, rest: REST) {
   try {
-    logger.debug("Started refreshing application slash commands");
+    logger.debug("Started refreshing application commands");
 
-    await rest.put(Routes.applicationCommands(clientId), {
+    rest.put(Routes.applicationCommands(clientId), { body: [] })
+      .then(() => logger.debug("Successfully deleted all application commands"))
+      .catch((error) => {
+        logger.error("Failed to delete application commands", error);
+        process.exit(1);
+      });
+
+    rest.put(Routes.applicationCommands(clientId), {
       body: commands
-    });
+    })
+      .then(() => logger.debug("Successfully reloaded application commands"))
+      .catch((error) => {
+        logger.error("Failed to reload application commands", error);
+        process.exit(1);
+      });
 
-    logger.debug("Successfully reloaded application slash commands");
   } catch (error) {
     logger.error(error);
     process.exit(1);

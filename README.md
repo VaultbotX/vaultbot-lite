@@ -1,3 +1,3 @@
 # vaultbot-lite
 
-Barebones implementation of the core functionality of Vaultbot
+Bare-bones implementation of the core functionality of Vaultbot

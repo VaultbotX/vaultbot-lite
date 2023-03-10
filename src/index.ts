@@ -1,6 +1,7 @@
 import { REST, Client, GatewayIntentBits } from "discord.js";
 import { logger } from "./logger";
 import { onInteraction, onReady, refreshSlashCommands } from "./discord";
+import { initDatabaseConnection } from "./database";
 
 if (process.env.NODE_ENV !== "production") {
   logger.level = "debug"
@@ -27,6 +28,10 @@ if (!DISCORD_CLIENT_ID) {
   logger.error("DISCORD_CLIENT_ID is not set")
   process.exit(1)
 }
+
+;(async () => {
+  await initDatabaseConnection()
+})();
 
 const rest: REST = new REST({ version: "10" }).setToken(DISCORD_TOKEN)
 
