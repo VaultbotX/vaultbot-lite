@@ -45,15 +45,16 @@ const rest = new REST({ version: "10" }).setToken(DISCORD_TOKEN)
 
 ;(async () => {
   try {
-    console.log("Started refreshing application (/) commands.")
+    logger.debug("Started refreshing application slash commands.")
 
     await rest.put(Routes.applicationCommands(DISCORD_CLIENT_ID), {
       body: commands,
     })
 
-    console.log("Successfully reloaded application (/) commands.")
+    logger.debug("Successfully reloaded application slash commands.")
   } catch (error) {
-    console.error(error)
+    logger.error(error)
+    process.exit(1)
   }
 })()
 
@@ -61,7 +62,7 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] })
 
 client.on("ready", () => {
   if (!client.user) {
-    logger.error("Client user is not set")
+    logger.error("Client user is not set. This should not happen.")
     process.exit(1)
   }
   logger.info(`Logged in as ${client.user.tag}`)
@@ -72,6 +73,7 @@ client.on("interactionCreate", async (interaction) => {
 
   if (interaction.commandName === CommandNames.ping) {
     await interaction.reply("Pong!")
+    logger.debug("Replied with Pong!")
   }
 })
 
