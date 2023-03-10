@@ -9,8 +9,11 @@ const logger = winston.createLogger({
 
 if (process.env.NODE_ENV !== "production") {
   logger.level = "debug"
+
+  const envPath = require("path").resolve(process.cwd(), ".env")
+
   require("dotenv").config({
-    path: "../.env",
+    path: envPath,
   })
   logger.info("Running in development mode")
 } else {
@@ -74,7 +77,22 @@ client.on("interactionCreate", async (interaction) => {
   if (interaction.commandName === CommandNames.ping) {
     await interaction.reply("Pong!")
     logger.debug("Replied with Pong!")
+
+    // Can access guild from the interaction
+    const guild = interaction.guild
+    if (!guild) {
+      logger.error("Guild is not set. This should not happen.")
+      process.exit(1)
+    }
+
+    logger.debug(interaction.guild.name)
+    logger.debug(interaction.guild.id)
   }
 })
 
 client.login(DISCORD_TOKEN)
+  .catch((error) => {
+    logger.error(error)
+    process.exit(1)
+  }
+)
