@@ -34,7 +34,7 @@ if (!DISCORD_CLIENT_ID) {
 }
 
 enum CommandNames {
-	ping = "ping",
+  ping = "ping",
 }
 
 const commands = [
@@ -90,9 +90,7 @@ client.on("interactionCreate", async (interaction) => {
   }
 })
 
-client.login(DISCORD_TOKEN)
-  .catch((error) => {
-    logger.error(error)
-    process.exit(1)
-  }
-)
+client.login(DISCORD_TOKEN).catch((error) => {
+  logger.error(error)
+  process.exit(1)
+})
