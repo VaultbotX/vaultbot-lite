@@ -1,7 +1,7 @@
 import { REST, Client, GatewayIntentBits } from "discord.js"
 import { logger } from "./logger"
 import { onInteraction, onReady, refreshSlashCommands } from "./discord"
-import { initNeo4jConnection } from "./database"
+import { initMongoConnection, initNeo4jConnection } from "./database";
 
 if (process.env.NODE_ENV !== "production") {
   logger.level = "debug"
@@ -40,8 +40,36 @@ if (!NEO4J_AUTH) {
   process.exit(1)
 }
 
+const MONGO_HOST = process.env.MONGO_HOST
+if (!MONGO_HOST) {
+  logger.error("MONGO_HOST is not set")
+  process.exit(1)
+}
+
+const MONGO_INITDB_ROOT_USERNAME = process.env.MONGO_INITDB_ROOT_USERNAME
+if (!MONGO_INITDB_ROOT_USERNAME) {
+  logger.error("MONGO_INITDB_ROOT_USERNAME is not set")
+  process.exit(1)
+}
+
+const MONGO_INITDB_ROOT_PASSWORD = process.env.MONGO_INITDB_ROOT_PASSWORD
+if (!MONGO_INITDB_ROOT_PASSWORD) {
+  logger.error("MONGO_INITDB_ROOT_PASSWORD is not set")
+  process.exit(1)
+}
+
+const MONGO_INITDB_DATABASE = process.env.MONGO_INITDB_DATABASE
+if (!MONGO_INITDB_DATABASE) {
+  logger.error("MONGO_INITDB_DATABASE is not set")
+  process.exit(1)
+}
+
 ;(async () => {
   await initNeo4jConnection()
+})()
+
+;(async () => {
+  await initMongoConnection()
 })()
 
 const rest: REST = new REST({ version: "10" }).setToken(DISCORD_TOKEN)

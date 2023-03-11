@@ -1,8 +1,9 @@
-version: "3"
+version: "3.8"
 
 services:
   neo4j:
     image: neo4j:5.5.0-community
+    container_name: vaultbot-neo4j
     ports:
       - "7474:7474"
       - "7687:7687"
@@ -11,5 +12,18 @@ services:
     environment:
       - NEO4J_AUTH=${NEO4J_AUTH}
 
+  mongo:
+    image: mongo:6.0.4
+    container_name: vaultbot-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+
 volumes:
   neo4j_data:
+  mongo_data:
