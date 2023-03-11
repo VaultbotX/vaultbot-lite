@@ -1,9 +1,7 @@
 import { ChatInputCommandInteraction } from "discord.js";
-import { logger } from "../../logger";
-import { getSongWithAudioFeatures } from "../../spotify/commands/getSongWithAudioFeatures";
-
-const spotifyLinkRegex = /^https?:\/\/open.spotify.com\/track\/([a-zA-Z0-9]+)(\?si=[a-zA-Z0-9]+)?$/;
-const spotifySongIdRegex = /^[a-zA-Z0-9]+$/;
+import { logger } from "../../logger"
+import { getSong } from "../../internal/commands/getSong";
+import { processSongData } from "../../internal/commands/processSongData";
 
 export async function addSongHandler(interaction: ChatInputCommandInteraction) {
   const songText = interaction.options.getString("song");
@@ -15,31 +13,24 @@ export async function addSongHandler(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  let spotifySongId: string | null = null;
-  if (spotifyLinkRegex.test(songText)) {
-    const match = songText.match(spotifyLinkRegex);
-    spotifySongId = match ? match[1] : null;
-  } else if (spotifySongIdRegex.test(songText)) {
-    spotifySongId = songText;
-  } else {
-    await interaction.reply("That doesn't look like a valid song!");
-    logger.debug(`Invalid song ID or URL provided: "${songText}"`, meta);
+  const getSongResult = await getSong(songText, meta);
+  if (getSongResult.isInvalidInput) {
+    await interaction.reply("Invalid song ID or URL provided!");
+    return;
+  }
+  if (getSongResult.isSongNotFound) {
+    await interaction.reply("Could not find song!");
     return;
   }
 
-  if (!spotifySongId) {
-    await interaction.reply("That doesn't look like a valid song!")
-    logger.debug(`Attempted to parse song "${songText}" but could not find a song ID`, meta);
+  if (!getSongResult.song) {
+    await interaction.reply("Something went wrong!");
+    logger.error("The song was not found, but no error was thrown, this should not happen.", meta);
     return;
   }
 
-  const song = await getSongWithAudioFeatures(spotifySongId, meta);
-  if (!song) {
-    await interaction.reply("I couldn't find that song!");
-    logger.debug(`Could not find song "${songText}"`, meta);
-    return;
-  }
+  const processSongDataResult = await processSongData(getSongResult.song, meta);
+  logger.info(processSongDataResult)
 
-  logger.info(JSON.stringify(song), meta)
   await interaction.reply("Added song!");
 }
