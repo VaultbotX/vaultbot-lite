@@ -1,29 +1,55 @@
 import { logger } from "../logger"
-import { Client, Interaction, REST, Routes } from "discord.js"
-import { addSongHandler } from "./commands/addSongHandler"
+import {
+  Client,
+  GatewayIntentBits,
+  Interaction,
+  REST,
+  RESTPostAPIChatInputApplicationCommandsJSONBody,
+  Routes,
+  SlashCommandBuilder,
+} from "discord.js"
+import * as path from "path"
+import * as fs from "fs"
+import { addSongHandler } from "./commandHandlers/addSongHandler"
 
 export enum CommandNames {
   add = "add",
 }
 
-export const commands = [
-  {
-    name: CommandNames.add,
-    description: "Adds a song to the dynamic playlist for two weeks",
-  },
-]
+const commands: RESTPostAPIChatInputApplicationCommandsJSONBody[] = []
+const commandsPath = path.join(__dirname, "commands")
+const commandFiles = fs.readdirSync(commandsPath)
+
+export const discordClient = new Client({ intents: [GatewayIntentBits.Guilds] })
+
+for (const file of commandFiles) {
+  const command: {
+    data: SlashCommandBuilder
+    execute: Promise<void>
+  } = require(`./commands/${file}`)
+  commands.push(command.data.toJSON())
+}
+
+discordClient.on("ready", onReady())
+discordClient.on("interactionCreate", onInteraction())
 
 export async function refreshSlashCommands(clientId: string, rest: REST) {
   try {
     logger.debug("Started refreshing application commands")
 
-    rest
-      .put(Routes.applicationCommands(clientId), { body: [] })
-      .then(() => logger.debug("Successfully deleted all application commands"))
-      .catch((error) => {
-        logger.error("Failed to delete application commands", error)
-        process.exit(1)
-      })
+    // Only delete commands in production, since we are not limiting to a specific
+    // guild in development, this ensures that refreshing is not destructive
+    if (process.env.NODE_ENV === "production") {
+      rest
+        .put(Routes.applicationCommands(clientId), { body: [] })
+        .then(() =>
+          logger.debug("Successfully deleted all application commands")
+        )
+        .catch((error) => {
+          logger.error("Failed to delete application commands", error)
+          process.exit(1)
+        })
+    }
 
     rest
       .put(Routes.applicationCommands(clientId), {
@@ -40,7 +66,7 @@ export async function refreshSlashCommands(clientId: string, rest: REST) {
   }
 }
 
-export function onReady() {
+function onReady() {
   return (client: Client<true>) => {
     if (!client.user) {
       logger.error("Client user is not set. This should not happen.")
@@ -50,14 +76,15 @@ export function onReady() {
   }
 }
 
-export function onInteraction() {
+function onInteraction() {
   return async (interaction: Interaction) => {
     if (!interaction.isChatInputCommand()) return
-    logger.debug(
-      `Received interaction ${interaction.commandName}`,
-      interaction.guildId,
-      interaction.user.id
-    )
+    const meta = {
+      guildId: interaction.guildId,
+      userId: interaction.user.id,
+    }
+
+    logger.debug(`Received interaction ${interaction.commandName}`, meta)
 
     switch (interaction.commandName) {
       case CommandNames.add:
@@ -65,10 +92,6 @@ export function onInteraction() {
         break
     }
 
-    logger.debug(
-      `Finished interaction ${interaction.commandName}`,
-      interaction.guildId,
-      interaction.user.id
-    )
+    logger.debug(`Finished interaction ${interaction.commandName}`, meta)
   }
 }

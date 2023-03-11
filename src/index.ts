@@ -1,6 +1,6 @@
-import { REST, Client, GatewayIntentBits } from "discord.js"
+import { REST } from "discord.js"
 import { logger } from "./logger"
-import { onInteraction, onReady, refreshSlashCommands } from "./discord"
+import { discordClient, refreshSlashCommands } from "./discord"
 import { initMongoConnection, initNeo4jConnection } from "./database"
 import { initSpotifyClient } from "./spotify"
 
@@ -16,6 +16,21 @@ if (process.env.NODE_ENV !== "production") {
 } else {
   logger.info("Running in production mode")
 }
+
+process.on("SIGTERM", () => {
+  logger.info("SIGTERM received, shutting down")
+  process.exit(0)
+})
+
+process.on("SIGINT", () => {
+  logger.info("SIGINT received, shutting down")
+  process.exit(0)
+})
+
+process.on("uncaughtException", (error) => {
+  logger.crit("Uncaught exception", error)
+  process.exit(1)
+})
 
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN
 if (!DISCORD_TOKEN) {
@@ -86,19 +101,12 @@ if (!SPOTIFY_CLIENT_SECRET) {
 ;(async () => {
   await initMongoConnection()
 })()
-
-const rest: REST = new REST({ version: "10" }).setToken(DISCORD_TOKEN)
-
 ;(async () => {
+  const rest: REST = new REST({ version: "10" }).setToken(DISCORD_TOKEN)
   await refreshSlashCommands(DISCORD_CLIENT_ID, rest)
 })()
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] })
-
-client.on("ready", onReady())
-client.on("interactionCreate", onInteraction())
-
-client.login(DISCORD_TOKEN).catch((error) => {
+discordClient.login(DISCORD_TOKEN).catch((error) => {
   logger.error(error)
   process.exit(1)
 })
