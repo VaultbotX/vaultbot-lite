@@ -38,8 +38,9 @@ export async function getSongWithAudioFeatures(
     return null;
   }
 
-  const spotifyArtistPromises = spotifySong.artists.map((artist) => spotifyClient.artists.get(artist.id));
-  const spotifyArtists = await Promise.all(spotifyArtistPromises);
+  const spotifyArtists = await spotifyClient.artists
+    .getMultiple(spotifySong.artists
+      .map((artist) => artist.id));
 
   const artists: Artist[] = [];
   spotifyArtists.forEach((spotifyArtist) => {
