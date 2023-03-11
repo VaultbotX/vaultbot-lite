@@ -1,14 +1,15 @@
 import { logger } from "../logger"
 import { Client, Interaction, REST, Routes } from "discord.js"
+import { addSongHandler } from "./commands/addSongHandler"
 
 export enum CommandNames {
-  ping = "ping",
+  add = "add",
 }
 
 export const commands = [
   {
-    name: CommandNames.ping,
-    description: "Replies with Pong!",
+    name: CommandNames.add,
+    description: "Adds a song to the dynamic playlist for two weeks",
   },
 ]
 
@@ -52,20 +53,22 @@ export function onReady() {
 export function onInteraction() {
   return async (interaction: Interaction) => {
     if (!interaction.isChatInputCommand()) return
+    logger.debug(
+      `Received interaction ${interaction.commandName}`,
+      interaction.guildId,
+      interaction.user.id
+    )
 
-    if (interaction.commandName === CommandNames.ping) {
-      await interaction.reply("Pong!")
-      logger.debug("Replied with Pong!")
-
-      // Can access guild from the interaction
-      const guild = interaction.guild
-      if (!guild) {
-        logger.error("Guild is not set. This should not happen.")
-        process.exit(1)
-      }
-
-      logger.debug(interaction.guild.name)
-      logger.debug(interaction.guild.id)
+    switch (interaction.commandName) {
+      case CommandNames.add:
+        await addSongHandler(interaction)
+        break
     }
+
+    logger.debug(
+      `Finished interaction ${interaction.commandName}`,
+      interaction.guildId,
+      interaction.user.id
+    )
   }
 }
