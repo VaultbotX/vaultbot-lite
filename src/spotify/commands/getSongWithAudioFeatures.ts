@@ -2,6 +2,7 @@ import { Song } from "../../internal/types/Song"
 import { spotifyClient } from "../index"
 import { logger } from "../../logger"
 import { Image } from "spotify-types"
+import { SpotifyAPIError } from "spotify-api.js";
 
 function getLargestImage(a: Image, b: Image) {
   if (!a.width && !b.width) return 0
@@ -14,6 +15,16 @@ export async function getSongWithAudioFeatures(
   trackId: string
 ): Promise<Song | null> {
   const spotifySong = await spotifyClient.tracks.get(trackId)
+    .catch((error: SpotifyAPIError) => {
+      if (error.response?.status === 400) {
+        const meta = { statusText: error.response?.statusText }
+        logger.debug(`Track with id "${trackId}" not found`, meta)
+        return null
+      }
+
+      const meta = { error }
+      logger.error(`Error getting track with id "${trackId}"`, meta)
+    })
   if (!spotifySong) return null
 
   const spotifyAudioFeatures = await spotifyClient.tracks.getAudioFeatures(
@@ -31,10 +42,6 @@ export async function getSongWithAudioFeatures(
     name: spotifySong.name,
     artists: spotifySong.artists.map((artist) => ({
       id: artist.id,
-      name: artist.name,
-      artistArtUrl: artist.images
-        ? artist.images.sort((a, b) => getLargestImage(a, b))[0].url
-        : undefined,
     })),
     albumId: spotifySong.album ? spotifySong.album.id : undefined,
     albumName: spotifySong.album ? spotifySong.album.name : undefined,

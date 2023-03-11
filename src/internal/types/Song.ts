@@ -5,8 +5,6 @@ export type Song = {
   name: string
   artists: {
     id: string
-    name: string
-    artistArtUrl: string | undefined
   }[]
   albumId: string | undefined
   albumName: string | undefined

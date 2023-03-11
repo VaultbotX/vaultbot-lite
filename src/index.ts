@@ -28,7 +28,7 @@ process.on("SIGINT", () => {
 })
 
 process.on("uncaughtException", (error) => {
-  logger.crit("Uncaught exception", error)
+  logger.error("Uncaught exception", error)
   process.exit(1)
 })
 
