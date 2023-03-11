@@ -1,8 +1,8 @@
 import { REST, Client, GatewayIntentBits } from "discord.js"
 import { logger } from "./logger"
 import { onInteraction, onReady, refreshSlashCommands } from "./discord"
-import { initMongoConnection, initNeo4jConnection } from "./database";
-import { initSpotifyClient } from "./spotify";
+import { initMongoConnection, initNeo4jConnection } from "./database"
+import { initSpotifyClient } from "./spotify"
 
 if (process.env.NODE_ENV !== "production") {
   logger.level = "debug"
@@ -80,11 +80,9 @@ if (!SPOTIFY_CLIENT_SECRET) {
 ;(async () => {
   await initSpotifyClient()
 })()
-
 ;(async () => {
   await initNeo4jConnection()
 })()
-
 ;(async () => {
   await initMongoConnection()
 })()

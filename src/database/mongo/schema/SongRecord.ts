@@ -1,4 +1,4 @@
-import { mongoConnection } from "../../index";
+import { mongoConnection } from "../../index"
 
 // @ts-ignore
 const songRecordSchema: mongoConnection.Schema = new mongoConnection.Schema({
@@ -7,7 +7,7 @@ const songRecordSchema: mongoConnection.Schema = new mongoConnection.Schema({
   songId: { type: String, required: true },
   guildId: { type: String, required: true, index: true },
   guildName: { type: String, required: true },
-  timestamp: { type: Date, default: Date.now, index: true }
-});
+  timestamp: { type: Date, default: Date.now, index: true },
+})
 
-export const SongRecord = mongoConnection.model('SongRecord', songRecordSchema)
+export const SongRecord = mongoConnection.model("SongRecord", songRecordSchema)
