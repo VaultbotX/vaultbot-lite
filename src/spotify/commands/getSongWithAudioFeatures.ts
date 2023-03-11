@@ -3,6 +3,7 @@ import { spotifyClient } from "../index"
 import { logger } from "../../logger"
 import { Image } from "spotify-types"
 import { SpotifyAPIError } from "spotify-api.js";
+import { Snowflake } from "discord.js";
 
 function getLargestImage(a: Image, b: Image) {
   if (!a.width && !b.width) return 0
@@ -12,17 +13,16 @@ function getLargestImage(a: Image, b: Image) {
 }
 
 export async function getSongWithAudioFeatures(
-  trackId: string
-): Promise<Song | null> {
+  trackId: string, defaultMeta: { interactionId: Snowflake }): Promise<Song | null> {
   const spotifySong = await spotifyClient.tracks.get(trackId)
     .catch((error: SpotifyAPIError) => {
       if (error.response?.status === 400) {
-        const meta = { statusText: error.response?.statusText }
+        const meta = { statusText: error.response?.statusText, ...defaultMeta }
         logger.debug(`Track with id "${trackId}" not found`, meta)
         return null
       }
 
-      const meta = { error }
+      const meta = { error, ...defaultMeta }
       logger.error(`Error getting track with id "${trackId}"`, meta)
     })
   if (!spotifySong) return null
@@ -32,7 +32,7 @@ export async function getSongWithAudioFeatures(
   )
   if (!spotifyAudioFeatures) {
     logger.error(
-      `Track with id ${trackId} (${spotifySong.name}) has no audio features`
+      `Track with id "${trackId}" (${spotifySong.name}) has no audio features`, defaultMeta
     )
     return null
   }

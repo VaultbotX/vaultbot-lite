@@ -82,6 +82,7 @@ function onInteraction() {
     const meta = {
       guildId: interaction.guildId,
       userId: interaction.user.id,
+      interactionId: interaction.id,
     }
 
     logger.debug(`Received interaction ${interaction.commandName}`, meta)
