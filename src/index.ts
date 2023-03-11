@@ -2,6 +2,7 @@ import { REST, Client, GatewayIntentBits } from "discord.js"
 import { logger } from "./logger"
 import { onInteraction, onReady, refreshSlashCommands } from "./discord"
 import { initMongoConnection, initNeo4jConnection } from "./database";
+import { initSpotifyClient } from "./spotify";
 
 if (process.env.NODE_ENV !== "production") {
   logger.level = "debug"
@@ -63,6 +64,22 @@ if (!MONGO_INITDB_DATABASE) {
   logger.error("MONGO_INITDB_DATABASE is not set")
   process.exit(1)
 }
+
+const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID
+if (!SPOTIFY_CLIENT_ID) {
+  logger.error("SPOTIFY_CLIENT_ID is not set")
+  process.exit(1)
+}
+
+const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET
+if (!SPOTIFY_CLIENT_SECRET) {
+  logger.error("SPOTIFY_CLIENT_SECRET is not set")
+  process.exit(1)
+}
+
+;(async () => {
+  await initSpotifyClient()
+})()
 
 ;(async () => {
   await initNeo4jConnection()
