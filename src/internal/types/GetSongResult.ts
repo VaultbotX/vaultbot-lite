@@ -1,7 +1,7 @@
-import { Song } from "./Song";
+import { Song } from "./Song"
 
 export type GetSongResult = {
-  song?: Song;
-  isInvalidInput?: boolean;
-  isSongNotFound?: boolean;
+  song?: Song
+  isInvalidInput?: boolean
+  isSongNotFound?: boolean
 }

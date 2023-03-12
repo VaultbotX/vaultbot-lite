@@ -1,6 +1,6 @@
 export type Artist = {
-  id: string,
+  id: string
   name: string
-  artistArtUrl: string | undefined,
-  genres: string[],
+  artistArtUrl: string | undefined
+  genres: string[]
 }

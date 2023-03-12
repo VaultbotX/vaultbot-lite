@@ -1,3 +1,1 @@
-export type ProcessSongDataResult = {
-
-}
+export type ProcessSongDataResult = {}

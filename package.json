@@ -1,7 +1,7 @@
 {
   "name": "vaultbot-lite",
   "version": "0.1.0",
-  "description": "Bare-bones implementation of the core functionality of Vaultbot",
+  "description": "Implementation of the core functionality of Vaultbot for self-hosting",
   "main": "src/index.ts",
   "scripts": {
     "start": "set NODE_ENV=production&&ts-node src/index.ts",
@@ -22,6 +22,7 @@
     "discord.js": "^14.7.1",
     "mongoose": "^7.0.1",
     "neo4j-driver": "^5.6.0",
+    "redis": "^4.6.5",
     "spotify-api.js": "^9.2.5",
     "winston": "^3.8.2"
   }

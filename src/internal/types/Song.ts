@@ -1,5 +1,5 @@
 import { SongAudioFeatures } from "./SongAudioFeatures"
-import { Artist } from "./Artist";
+import { Artist } from "./Artist"
 
 export type Song = {
   id: string

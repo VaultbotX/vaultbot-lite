@@ -24,6 +24,15 @@ services:
     ports:
       - "27017:27017"
 
+  redis:
+    image: redis:7.0.9
+    container_name: vaultbot-redis
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+
 volumes:
   neo4j_data:
   mongo_data:

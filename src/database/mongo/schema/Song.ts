@@ -1,10 +1,10 @@
-import { mongoConnection } from "../../index"
+import { mongoClient } from "../../index"
 
 // @ts-ignore
-const songSchema: mongoConnection.Schema = new mongoConnection.Schema({
+const songSchema: mongoClient.Schema = new mongoClient.Schema({
   id: { type: String, required: true, index: true },
   name: { type: String, required: true },
-  artists: new mongoConnection.Schema([
+  artists: new mongoClient.Schema([
     {
       id: { type: String, required: true },
       name: { type: String, required: true },
@@ -27,4 +27,4 @@ const songSchema: mongoConnection.Schema = new mongoConnection.Schema({
   },
 })
 
-export const Song = mongoConnection.model("Song", songSchema)
+export const Song = mongoClient.model("Song", songSchema)

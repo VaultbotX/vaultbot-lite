@@ -1,7 +1,7 @@
 import { REST } from "discord.js"
 import { logger } from "./logger"
 import { discordClient, refreshSlashCommands } from "./discord"
-import { initMongoConnection, initNeo4jConnection } from "./database"
+import { initMongoClient, initNeo4jClient, initRedisClient } from "./database"
 import { initSpotifyClient } from "./spotify"
 
 if (process.env.NODE_ENV !== "production") {
@@ -80,6 +80,18 @@ if (!MONGO_INITDB_DATABASE) {
   process.exit(1)
 }
 
+const REDIS_HOST = process.env.REDIS_HOST
+if (!REDIS_HOST) {
+  logger.error("REDIS_HOST is not set")
+  process.exit(1)
+}
+
+const REDIS_PASSWORD = process.env.REDIS_PASSWORD
+if (!REDIS_PASSWORD) {
+  logger.error("REDIS_PASSWORD is not set")
+  process.exit(1)
+}
+
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID
 if (!SPOTIFY_CLIENT_ID) {
   logger.error("SPOTIFY_CLIENT_ID is not set")
@@ -92,14 +104,23 @@ if (!SPOTIFY_CLIENT_SECRET) {
   process.exit(1)
 }
 
+const SPOTIFY_PLAYLIST_ID = process.env.SPOTIFY_PLAYLIST_ID
+if (!SPOTIFY_PLAYLIST_ID) {
+  logger.error("SPOTIFY_PLAYLIST_ID is not set")
+  process.exit(1)
+}
+
 ;(async () => {
   await initSpotifyClient()
 })()
 ;(async () => {
-  await initNeo4jConnection()
+  await initNeo4jClient()
 })()
 ;(async () => {
-  await initMongoConnection()
+  await initMongoClient()
+})()
+;(async () => {
+  await initRedisClient()
 })()
 ;(async () => {
   const rest: REST = new REST({ version: "10" }).setToken(DISCORD_TOKEN)
