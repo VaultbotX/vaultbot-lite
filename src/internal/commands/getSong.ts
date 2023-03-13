@@ -2,6 +2,7 @@ import { Snowflake } from "discord.js"
 import { logger } from "../../logger"
 import { getSongWithAudioFeatures } from "../../spotify/commands/getSongWithAudioFeatures"
 import { GetSongResult } from "../types/GetSongResult"
+import { Validity } from "../types/Validity"
 
 const spotifyLinkRegex =
   /^https?:\/\/open.spotify.com\/track\/([a-zA-Z0-9]+)(\?si=[a-zA-Z0-9]+)?$/
@@ -11,8 +12,6 @@ export async function getSong(
   songText: string,
   meta: { interactionId: Snowflake }
 ): Promise<GetSongResult> {
-  const result: GetSongResult = {}
-
   let spotifySongId: string | null = null
   if (spotifyLinkRegex.test(songText)) {
     const match = songText.match(spotifyLinkRegex)
@@ -21,8 +20,11 @@ export async function getSong(
     spotifySongId = songText
   } else {
     logger.debug(`Invalid song ID or URL provided: "${songText}"`, meta)
-    result.isInvalidInput = true
-    return result
+  
+    return {
+      kind: Validity.Invalid,
+      isInvalidInput: true
+    }
   }
 
   if (!spotifySongId) {
@@ -30,18 +32,26 @@ export async function getSong(
       `Attempted to parse song "${songText}" but could not find a song ID`,
       meta
     )
-    result.isInvalidInput = true
-    return result
+
+    return {
+      kind: Validity.Invalid,
+      isInvalidInput: true
+    }
   }
 
   const song = await getSongWithAudioFeatures(spotifySongId, meta)
   if (!song) {
     logger.debug(`Could not find song "${songText}"`, meta)
-    result.isSongNotFound = true
-    return result
+
+    return {
+      kind: Validity.Invalid,
+      isSongNotFound: true
+    }
   }
 
   logger.debug(`Found song "${songText}"`, meta)
-  result.song = song
-  return result
+  return {
+    kind: Validity.Valid,
+    song: song
+  }
 }
