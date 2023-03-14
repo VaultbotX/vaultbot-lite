@@ -1,21 +1,32 @@
-import { Song } from "../types/Song"
-import { Snowflake } from "discord.js"
-import { ProcessSongDataResult } from "../types/ProcessSongDataResult"
+import { Song } from "../types/Song";
+import { Snowflake } from "discord.js";
+import { ProcessSongDataResult } from "../types/ProcessSongDataResult";
+import { redisClient } from "../../database";
+import { logger } from "../../logger";
+import { Validity } from "../types/Validity";
 
 export async function processSongData(
   song: Song,
   meta: { interactionId: Snowflake }
 ): Promise<ProcessSongDataResult> {
+  await redisClient.connect()
+  const existingSong = await redisClient.get(song.id)
+  if (existingSong) {
+    logger.debug(
+      `Song "${song.id}" is already in the playlist, skipping...`,
+      meta
+    )
+    await redisClient.disconnect()
+    return {
+      kind: Validity.Invalid,
+      isAlreadyAdded: true,
+    }
+  }
+  await redisClient.disconnect()
+  logger.debug(`Song ${song.id} is not in the playlist, adding...`, meta)
+
   /**
    * Things that need to happen in here specifically:
-   *
-   * 1. Check if the song is currently in the playlist. For this, it might be best to query the playlist
-   * on initialization and store it in memory, then check if the song is in the playlist on every
-   * interaction. This would be the most efficient way to do it for the time being.
-   * Alternatively, we could just store this in a new MongoDB collection, which may provide
-   * better control over how we query the data. This should probably be cleared and re-populated
-   * on initialization, and then updated on every interaction.
-   *
    * 2. If the song is not in the playlist, add it to the playlist.
    * This should not just add the song, but also consider the additional data that is associated with it.
    * For example, we may need to add a new album record, and 1+ new artist records, and 1+ new genre records.
@@ -33,5 +44,8 @@ export async function processSongData(
    * 3. We return success back to the user, and we also return the song that was added to the playlist.
    */
 
-  return {}
+  return {
+    kind: Validity.Valid,
+    song: song,
+  }
 }
