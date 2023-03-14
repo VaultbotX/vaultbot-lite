@@ -3,6 +3,7 @@ import { logger } from "./logger"
 import { discordClient, refreshSlashCommands } from "./discord"
 import { initMongoClient, initNeo4jClient, initRedisClient } from "./database"
 import { initSpotifyClient } from "./spotify"
+import Bree from "bree";
 
 if (process.env.NODE_ENV !== "production") {
   logger.level = "debug"
@@ -126,6 +127,22 @@ if (!SPOTIFY_PLAYLIST_ID) {
   const rest: REST = new REST({ version: "10" }).setToken(DISCORD_TOKEN)
   await refreshSlashCommands(DISCORD_CLIENT_ID, rest)
 })()
+
+const bree = new Bree({
+  jobs: [
+    {
+      name: "purgePlaylist",
+      cron: "2 * * * *",
+      path: "./src/internal/jobs/purgePlaylist.ts",
+    }
+  ]
+})
+
+bree.start()
+  .catch((error) => {
+    logger.error(error)
+    process.exit(1)
+  })
 
 discordClient.login(DISCORD_TOKEN).catch((error) => {
   logger.error(error)

@@ -47,5 +47,5 @@ export async function addSongHandler(interaction: ChatInputCommandInteraction) {
   const processSongDataResult = await processSongData(song, meta)
   logger.info(processSongDataResult)
 
-  await interaction.reply("Added song!")
+  await interaction.reply("Not implemented yet!")
 }

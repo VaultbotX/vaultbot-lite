@@ -34,7 +34,6 @@ export async function initSpotifyClient() {
     },
   })
 
-  // Cache all songs in the playlist
   await spotifyClient.playlists.getTracks(playlistId).then(async (songs) => {
     logger.debug(`Caching ${songs.length} songs`)
     await redisClient.connect()
