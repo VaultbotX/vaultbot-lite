@@ -1,4 +1,5 @@
 # vaultbot-lite
+## Phasing out for a Go rewrite at https://github.com/VaultbotX/vaultbot-lite-v2
 
 Bare-bones implementation of the core functionality of Vaultbot.
 This is meant to be a self-hosted implementation of Vaultbot without any associated cloud infrastructure.
